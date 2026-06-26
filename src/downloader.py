@@ -17,24 +17,24 @@ def rsssf_url(year: int) -> str:
 
 def download(year: int):
     url = rsssf_url(year)
-    outfile = RAW_DIR / f"{year}.html"
+    output_file = RAW_DIR / f"{year}.html"
 
-    if outfile.exists():
-        print(f"✓ {year} already downloaded")
-        return
+    print(f"Downloading from: {url}")
 
-    print(f"Downloading {year}...")
-
-    r = requests.get(
+    response = requests.get(
         url,
         headers={"User-Agent": "Mozilla/5.0"},
         timeout=30,
     )
-    r.raise_for_status()
 
-    outfile.write_text(r.text, encoding="utf-8")
+    print("Status code:", response.status_code)
+    print("Final URL:", response.url)
 
-    print(f"Saved {outfile}")
+    response.raise_for_status()
+
+    output_file.write_text(response.text, encoding="utf-8")
+
+    print(f"Saved {output_file}")
 
 
 def main():
@@ -46,14 +46,12 @@ def main():
 
     if args.year:
         download(args.year)
-
     elif args.all:
         for year in range(FIRST_YEAR, LAST_YEAR + 1):
             try:
                 download(year)
             except Exception as e:
                 print(f"{year}: {e}")
-
     else:
         parser.print_help()
 
